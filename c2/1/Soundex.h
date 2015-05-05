@@ -5,12 +5,13 @@
 #include <unordered_map>
 
 static const size_t MaxCodeLength {4};
+const std::string NotADigit{"*"};
 
 class Soundex
 {
 public:
     std::string encode(const std::string& word) const {
-        return zeroPad(head(word) + encodedDigits(tail(word)));
+        return zeroPad(upperFront(head(word)) + encodedDigits(tail(word)));
     }
 
     std::string encodedDigit(char letter) const {
@@ -24,7 +25,7 @@ public:
             {'r', "6"},
         };
         auto it = encodings.find(letter);
-        return it == encodings.end() ? "" : it->second;
+        return it == encodings.end() ? NotADigit : it->second;
     }
 
 private:
@@ -36,14 +37,20 @@ private:
         return word.substr(1);
     }
 
+    char lower(char c) const {
+        return std::tolower(static_cast<unsigned char>(c));
+    }
+
     std::string encodedDigits(const std::string& word) const {
         std::string encoding;
         for (auto letter: word) {
             if (isComplete(encoding)) {
                 break;
             }
-            if (encodedDigit(letter) != lastDigit(encoding)) {
-                encoding += encodedDigit(letter);
+
+            auto digit = encodedDigit(lower(letter));
+            if (digit != NotADigit && digit != lastDigit(encoding)) {
+                encoding += digit;
             }
         }
 
@@ -61,9 +68,13 @@ private:
 
     std::string lastDigit(const std::string& encoding) const {
         if (encoding.empty()) {
-            return "";
+            return NotADigit;
         }
         return std::string(1, encoding.back());
+    }
+
+    std::string upperFront(const std::string& string) const {
+        return std::string(1, std::toupper(static_cast<unsigned char>(string.front())));
     }
 
 };
