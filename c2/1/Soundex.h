@@ -11,7 +11,7 @@ class Soundex
 {
 public:
     std::string encode(const std::string& word) const {
-        return zeroPad(upperFront(head(word)) + encodedDigits(tail(word)));
+        return zeroPad(upperFront(head(word)) + tail(encodedDigits(word)));
     }
 
     std::string encodedDigit(char letter) const {
@@ -24,7 +24,7 @@ public:
             {'m', "5"}, {'n', "5"},
             {'r', "6"},
         };
-        auto it = encodings.find(letter);
+        auto it = encodings.find(lower(letter));
         return it == encodings.end() ? NotADigit : it->second;
     }
 
@@ -43,12 +43,15 @@ private:
 
     std::string encodedDigits(const std::string& word) const {
         std::string encoding;
-        for (auto letter: word) {
+
+        encoding += encodedDigit(word.front());
+
+        for (auto letter: tail(word)) {
             if (isComplete(encoding)) {
                 break;
             }
 
-            auto digit = encodedDigit(lower(letter));
+            auto digit = encodedDigit(letter);
             if (digit != NotADigit && digit != lastDigit(encoding)) {
                 encoding += digit;
             }
@@ -58,7 +61,7 @@ private:
     }
 
     bool isComplete(const std::string& encoding) const {
-        return encoding.length() == MaxCodeLength - 1;
+        return encoding.length() == MaxCodeLength;
     }
 
     std::string zeroPad(const std::string& word) const {
